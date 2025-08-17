@@ -1,0 +1,36 @@
+model transaction {
+    id             Int                  @id @default(autoincrement())
+    userId         BigInt
+    user           users                @relation(fields: [userId], references: [id])
+    amount         Float
+    provider       PaymentProvider
+    subscription   Active_subscription? @relation(fields: [subscriptionId], references: [id])
+    createdAt      DateTime             @default(now())
+    updatedAt      DateTime             @updatedAt
+    subscriptionId Int?
+    // paymeuzdata    PaymeData            @relation(fields: [paymeDataId], references: [id])
+    prepareId      BigInt?
+    transactionId  String?
+    performTime    DateTime?
+    cancelTime     DateTime?
+    state          Int?
+    reason         Int?
+    status         TransactionStatus    @default(CREATED)
+}
+
+enum TransactionStatus {
+    PENDING
+    CREATED
+    PAID
+    CANCELED
+    WITHDRAW
+}
+
+enum PaymentProvider {
+    PAYME
+    CLICKUZ
+    OCTO_UZ
+    ATMOSUZ
+    PAYNETUZ
+    SYSTEM
+}

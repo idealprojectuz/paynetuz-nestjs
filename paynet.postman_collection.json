@@ -1,0 +1,135 @@
+{
+	"info": {
+		"_postman_id": "a813c5a1-382d-4974-a4a9-b48b0949cf3b",
+		"name": "paynet",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "17469950",
+		"_collection_link": "https://solar-eclipse-316690.postman.co/workspace/paytechuz~ebf02839-9e96-4073-ae2f-6161136a5127/collection/17469950-a813c5a1-382d-4974-a4a9-b48b0949cf3b?action=share&source=collection_link&creator=17469950"
+	},
+	"item": [
+		{
+			"name": "GetInformation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"GetInformation\",\n    \"id\": 1,\n    \"params\": {\n        \"serviceId\": 1,\n        \"fields\": {\n            \"param_name\": \"1\"\n        }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{local}}/paynet/update"
+			},
+			"response": []
+		},
+		{
+			"name": "PerformTransaction",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"PerformTransaction\",\n    \"id\": 10,\n    \"params\": {\n        \"serviceId\": 1,\n        \"transactionId\": 11,\n        \"amount\": 10000,\n        \"fields\": {\n            \"param_name\": 9653\n        }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{local}}/paynet/update"
+			},
+			"response": []
+		},
+		{
+			"name": "CheckTransaction",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"CheckTransaction\",\n    \"id\": 11,\n    \"params\": {\n        \"serviceId\": 1,\n        \"transactionId\": 11,\n        \"timestamp\": \"2022-08-26 11:23:09\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{local}}/paynet/update"
+			},
+			"response": []
+		},
+		{
+			"name": "CancelTransaction",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"CancelTransaction\",\n    \"id\": 10,\n    \"params\": {\n        \"serviceId\": 1,\n        \"transactionId\": 10,\n        \"timestamp\": \"2022-08-26 11:23:09\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{local}}/paynet/update"
+			},
+			"response": []
+		},
+		{
+			"name": "GetStatement",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"GetStatement\",\n    \"id\": 10,\n    \"params\": {\n        \"serviceId\": 1,\n        \"dateFrom\": \"2024-11-30 00:00:00\",\n        \"dateTo\": \"2024-11-30 23:00:00\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{local}}/paynet/update"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": {
+			"password": "password",
+			"username": "username"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "local",
+			"value": "http://localhost:8005",
+			"type": "string"
+		}
+	]
+}
