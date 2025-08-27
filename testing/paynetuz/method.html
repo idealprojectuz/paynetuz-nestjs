@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Paynet NorthWind - Methods</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            text-align: left;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 30px;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            width: 150px;
+            font-weight: bold;
+        }
+
+        select, input {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin-left: 10px;
+            font-size: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .full-width-button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 16px;
+            background-color: #2196F3;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 13px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .method-fields {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .field-group {
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status-bar {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9e9e9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <img src="https://cdn.prod.website-files.com/6399bcedb6020e301f825c28/644e05c460a3270b14e86c6f_paynet-logo-5.svg"
+         alt="Paynet NorthWind" width="300" class="logo">
+
+    <div class="status-bar">
+        Connected to: <span id="current-url"></span> |
+        User: <span id="current-user"></span> |
+        <a href="index.html">Change settings</a>
+    </div>
+
+    <div class="form-group">
+        <label for="method">Method:</label>
+        <select id="method" onchange="showMethodFields()">
+            <option value="">Select a method...</option>
+            <option value="runAll">Run All Test Cases</option>
+            <option value="getInformation">GetInformation - Get information</option>
+            <option value="performTransaction">PerformTransaction - Execute transaction</option>
+            <option value="checkTransaction">CheckTransaction - Check transaction</option>
+            <option value="cancelTransaction">CancelTransaction - Cancel transaction</option>
+            <option value="getStatement">GetStatement - Get statement</option>
+        </select>
+    </div>
+
+    <div id="runAllFields" class="method-fields hidden">
+        <h3>GetInformation Parameters</h3>
+        <div class="field-group">
+            <label for="raServiceId">Service ID:</label>
+            <input type="number" id="raServiceId" placeholder="14 digits">
+        </div>
+        <div class="field-group">
+            <label for="raFieldName">Field Name:</label>
+            <input type="text" id="raFieldName" placeholder="e.g., phone">
+        </div>
+        <div class="field-group">
+            <label for="raFieldValue">Field Value (Found):</label>
+            <input type="text" id="raFieldValue" placeholder="e.g., 998901234567">
+        </div>
+        <div class="field-group">
+            <label for="raFieldValueX">Field Value (NotFound):</label>
+            <input type="text" id="raFieldValueX" placeholder="e.g., 998901234567">
+        </div>
+
+        <div class="field-group">
+            <label for="raAmount">Amount:</label>
+            <input type="number" id="raAmount" placeholder="In smallest currency units">
+        </div>
+
+        <div class="field-group">
+            <label for="raAmountX">Amount:</label>
+            <input type="number" id="raAmountX" placeholder="In smallest currency units">
+        </div>
+        <div class="field-group">
+            <label for="raTranId">Transaction ID:</label>
+            <input type="text" id="raTranId" placeholder="Transaction ID" required>
+        </div>
+        <div class="field-group">
+            <label for="raDateFrom">Date From:</label>
+            <input type="datetime-local" id="raDateFrom">
+        </div>
+        <div class="field-group">
+            <label for="raDateTo">Date To:</label>
+            <input type="datetime-local" id="raDateTo">
+        </div>
+        <div class="timestamp">Format: yyyy-mm-dd hh:mm:ss</div>
+    </div>
+
+    <div id="getInformationFields" class="method-fields hidden">
+        <h3>GetInformation Parameters</h3>
+        <div class="field-group">
+            <label for="giServiceId">Service ID:</label>
+            <input type="number" id="giServiceId" placeholder="14 digits">
+        </div>
+        <div class="field-group">
+            <label for="giFieldName">Field Name:</label>
+            <input type="text" id="giFieldName" placeholder="e.g., phone">
+        </div>
+        <div class="field-group">
+            <label for="giFieldValue">Field Value:</label>
+            <input type="text" id="giFieldValue" placeholder="e.g., 998901234567">
+        </div>
+    </div>
+
+    <div id="performTransactionFields" class="method-fields hidden">
+        <h3>PerformTransaction Parameters</h3>
+        <div class="field-group">
+            <label for="ptServiceId">Service ID:</label>
+            <input type="number" id="ptServiceId" placeholder="14 digits">
+        </div>
+        <div class="field-group">
+            <label for="ptAmount">Amount:</label>
+            <input type="number" id="ptAmount" placeholder="In smallest currency units">
+        </div>
+        <div class="field-group">
+            <label for="ptFieldName">Field Name:</label>
+            <input type="text" id="ptFieldName" placeholder="e.g., phone">
+        </div>
+        <div class="field-group">
+            <label for="ptFieldValue">Field Value:</label>
+            <input type="text" id="ptFieldValue" placeholder="e.g., 998901234567">
+        </div>
+        <div class="field-group">
+            <label for="ptTransactionId">Transaction ID:</label>
+            <input type="text" id="ptTransactionId" placeholder="Leave empty to generate">
+        </div>
+        <div class="timestamp">Format: yyyy-mm-dd hh:mm:ss</div>
+    </div>
+
+    <div id="checkTransactionFields" class="method-fields hidden">
+        <h3>CheckTransaction Parameters</h3>
+        <div class="field-group">
+            <label for="chkServiceId">Service ID:</label>
+            <input type="number" id="chkServiceId" placeholder="14 digits">
+        </div>
+        <div class="field-group">
+            <label for="chkTransactionId">Transaction ID:</label>
+            <input type="text" id="chkTransactionId" placeholder="Transaction ID to check" required>
+        </div>
+        <div class="timestamp">Format: yyyy-mm-dd hh:mm:ss</div>
+    </div>
+
+    <div id="cancelTransactionFields" class="method-fields hidden">
+        <h3>CancelTransaction Parameters</h3>
+        <div class="field-group">
+            <label for="ctServiceId">Service ID:</label>
+            <input type="number" id="ctServiceId" placeholder="14 digits">
+        </div>
+        <div class="field-group">
+            <label for="ctTransactionId">Transaction ID:</label>
+            <input type="text" id="ctTransactionId" placeholder="Transaction ID to cancel" required>
+        </div>
+        <div class="timestamp">Format: yyyy-mm-dd hh:mm:ss</div>
+    </div>
+
+    <div id="getStatementFields" class="method-fields hidden">
+        <h3>GetStatement Parameters</h3>
+        <div class="field-group">
+            <label for="gsServiceId">Service ID:</label>
+            <input type="number" id="gsServiceId" placeholder="14 digits">
+        </div>
+        <div class="field-group">
+            <label for="gsDateFrom">Date From:</label>
+            <input type="datetime-local" id="gsDateFrom">
+        </div>
+        <div class="field-group">
+            <label for="gsDateTo">Date To:</label>
+            <input type="datetime-local" id="gsDateTo">
+        </div>
+        <div class="timestamp">Format: yyyy-mm-dd hh:mm:ss</div>
+    </div>
+
+    <button id="executeButton" class="full-width-button" onclick="executeTest()">Execute Test</button>
+
+    <textarea id="output" readonly>
+Paynet API Tester - Ready
+------------------------------------------------------------
+Select a method and fill in the required parameters to begin testing.
+    </textarea>
+</div>
+
+<script>
+
+    window.onload = function () {
+        console.log('Initializing application...');
+        const url = localStorage.getItem('paynet_url');
+        const user = localStorage.getItem('paynet_user');
+
+        console.log('Loaded settings:', {url, user});
+
+        document.getElementById('current-url').textContent = url || 'Not set';
+        document.getElementById('current-user').textContent = user || 'Not set';
+
+        if (!url || !user) {
+            console.error('Missing required settings - redirecting to login');
+            alert('Please configure your API settings first');
+            window.location.href = 'index.html';
+        }
+
+        // Set default dates for GetStatement
+        const now = new Date();
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+        document.getElementById('gsDateFrom').value = formatDateTimeLocal(weekAgo);
+        document.getElementById('gsDateTo').value = formatDateTimeLocal(now);
+
+        console.log('Default dates set for GetStatement:', {
+            from: formatDateTimeLocal(weekAgo),
+            to: formatDateTimeLocal(now)
+        });
+    };
+
+    // Helper function to format date for datetime-local input
+    function formatDateTimeLocal(date) {
+        return date.toISOString().slice(0, 16);
+    }
+
+    // Show fields based on selected method
+    function showMethodFields() {
+        const method = document.getElementById('method').value;
+        console.log('Method selected:', method);
+
+        // Hide all fields first
+        document.querySelectorAll('.method-fields').forEach(el => {
+            el.classList.add('hidden');
+        });
+
+        // Show the selected method's fields
+        if (method) {
+            document.getElementById(method + 'Fields').classList.remove('hidden');
+            console.log('Showing fields for method:', method);
+        }
+
+        // Enable/disable execute button
+        document.getElementById('executeButton').disabled = !method;
+        console.log('Execute button state:', !method ? 'disabled' : 'enabled');
+    }
+
+    // Generate a unique transaction ID (11-20 digits as per documentation)
+    function generateTransactionId() {
+        return 1;
+    }
+
+    // Format date to Paynet's expected format
+    function formatPaynetDate(date) {
+        const pad = num => num.toString().padStart(2, '0');
+        const formatted = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+            `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        console.log('Formatted date:', formatted);
+        return formatted;
+    }
+
+    async function executeTest() {
+        console.log('--- Starting test execution ---');
+        const method = document.getElementById('method').value;
+        const output = document.getElementById('output');
+        output.value = '';
+
+        let requestBody = {};
+
+        try {
+            console.log('Executing method:', method);
+            switch (method) {
+                case 'runAll':
+                    console.log('Running all test cases');
+                    await runAllTests(output);
+                    return;
+                case 'getInformation':
+                    requestBody = getGetInformationBody(
+                        document.getElementById('giServiceId').value,
+                        document.getElementById('giFieldName').value,
+                        document.getElementById('giFieldValue').value);
+                    console.log('GetInformation request prepared:', requestBody);
+                    break;
+                case 'performTransaction':
+                    requestBody = getPerformTransactionBody(
+                        document.getElementById('ptServiceId').value,
+                        document.getElementById('ptAmount').value,
+                        document.getElementById('ptTransactionId').value,
+                        document.getElementById('ptFieldName').value,
+                        document.getElementById('ptFieldValue').value);
+                    console.log('PerformTransaction request prepared:', requestBody);
+                    break;
+                case 'checkTransaction':
+                    requestBody = getCheckTransactionBody(
+                        document.getElementById('chkServiceId').value,
+                        document.getElementById('chkTransactionId').value);
+                    console.log('CheckTransaction request prepared:', requestBody);
+                    break;
+                case 'cancelTransaction':
+                    requestBody = getCancelTransactionBody(
+                        document.getElementById('ctServiceId').value,
+                        document.getElementById('ctTransactionId').value);
+                    console.log('CancelTransaction request prepared:', requestBody);
+                    break;
+                case 'getStatement':
+                    requestBody = getGetStatementBody(
+                        document.getElementById('gsServiceId').value,
+                        document.getElementById('gsDateFrom').value,
+                        document.getElementById('gsDateTo').value);
+                    console.log('GetStatement request prepared:', requestBody);
+                    break;
+                default:
+                    console.error('Invalid method selected:', method);
+                    output.value = "Please select a valid method";
+                    return;
+            }
+
+            await sendRequest(requestBody, output);
+
+        } catch (error) {
+            console.error('Error during test execution:', error);
+            output.value = `Error preparing request: ${error.message}`;
+        }
+    }
+
+    async function sendRequest(requestBody, output) {
+        const endpoint = localStorage.getItem('paynet_url');
+        const username = localStorage.getItem('paynet_user');
+        const password = localStorage.getItem('paynet_pass');
+
+        output.value += `Sending request to: ${endpoint}\n` +
+            `Method: ${requestBody.method}\n` +
+            `Headers:\n` +
+            `  Content-Type: application/json\n` +
+            `  Authorization: Basic ${btoa(username + ':' + password)}\n\n` +
+            `Request Body:\n${JSON.stringify(requestBody, null, 2)}\n\n` +
+            `Waiting for response...`;
+
+        try {
+            console.log('Making API call to:', endpoint);
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa(username + ':' + password)
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            console.log('Received response, status:', response.status);
+            const data = await response.json();
+
+            output.value += `\nResponse (Status: ${data}):\n` +
+                JSON.stringify(data, null, 2);
+
+            if (!response.ok) {
+                console.error('API Error:', data);
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Request failed:', error);
+            output.value += `\nError: ${error.message}`;
+        }
+    }
+
+    async function runAllTests(output) {
+        console.log('--- Starting all tests execution ---');
+        const serviceId = parseInt(document.getElementById('raServiceId').value);
+        const fieldValueName = document.getElementById('raFieldName').value;
+        const fieldValueValid = document.getElementById('raFieldValue').value;
+        const fieldValueInvalid = document.getElementById('raFieldValueX').value;
+        const amount = parseInt(document.getElementById('raAmount').value);
+        const amountWrong = parseInt(document.getElementById('raAmountX').value);
+        const dateTo = document.getElementById('raDateTo').value;
+        const dateFrom = document.getElementById('raDateFrom').value;
+        const raTranId = document.getElementById('raTranId').value;
+
+        var text = '\n';
+
+        console.log('Test parameters:', {
+            serviceId,
+            fieldValueName,
+            fieldValueValid,
+            fieldValueInvalid,
+            amount,
+            amountWrong,
+            dateFrom,
+            dateTo,
+            raTranId
+        });
+
+        const testCases = [
+            {
+                name: 'Test 1: GetInformation (not found)',
+                body: () => getGetInformationBody(serviceId, fieldValueName, fieldValueInvalid),
+                expectedErrorCodes: [301, 302, 304, 305]
+            },
+            {
+                name: 'Test 2: GetInformation (found)',
+                body: () => getGetInformationBody(serviceId, fieldValueName, fieldValueValid),
+                expectResult: true
+            },
+            {
+                name: 'Test 3: PerformTransaction (not found)',
+                body: () => getPerformTransactionBody(serviceId, amount, raTranId, fieldValueName, fieldValueInvalid),
+                expectedErrorCodes: [301, 302, 304, 305]
+            },
+            {
+                name: 'Test 4: PerformTransaction (wrong amount)',
+                body: () => getPerformTransactionBody(serviceId, amountWrong, raTranId, fieldValueName, fieldValueValid),
+                expectedErrorCodes: [413]
+            },
+            {
+                name: 'Test 5: PerformTransaction (valid)',
+                body: () => getPerformTransactionBody(serviceId, amount, raTranId, fieldValueName, fieldValueValid),
+                expectResult: true
+            },
+            {
+                name: 'Test 6: PerformTransaction (duplicate)',
+                body: () => getPerformTransactionBody(serviceId, amount, raTranId, fieldValueName, fieldValueValid),
+                expectedErrorCodes: [201]
+            },
+            {
+                name: 'Test 7: CheckTransaction',
+                body: () => getCheckTransactionBody(serviceId, raTranId),
+                transactionState: 1
+            },
+            {
+                name: 'Test 8: GetStatement',
+                body: () => getGetStatementBody(serviceId, dateFrom, dateTo),
+                expectResult: true,
+                trnCount: 1
+
+            },
+            {
+                name: 'Test 9: CancelTransaction',
+                body: () => getCancelTransactionBody(serviceId, raTranId),
+                transactionState: 2
+            },
+            {
+                name: 'Test 10: CancelTransaction (already cancelled)',
+                body: () => getCancelTransactionBody(serviceId, raTranId),
+                expectedErrorCodes: [202]
+            },
+            {
+                name: 'Test 11: CheckTransaction',
+                body: () => getCheckTransactionBody(serviceId, raTranId),
+                transactionState: 2
+            },
+            {
+                name: 'Test 12: GetStatement',
+                body: () => getGetStatementBody(serviceId, dateFrom, dateTo),
+                expectResult: true,
+                trnCount: 0
+
+            }
+        ];
+
+        output.value = 'Starting all test cases...\n';
+
+        for (const test of testCases) {
+            console.log(`Running test: ${test.name}`);
+            output.value += `\n--- ${test.name} ---\n`;
+
+            try {
+                const requestBody = test.body();
+                const response = await sendRequest(requestBody, output);
+                output.value += response +'\n\n';
+                if (test.expectedErrorCodes) {
+                    const errorCode = response.error?.code;
+                    if (errorCode && test.expectedErrorCodes.includes(errorCode)) {
+                        text += `SUCCESS: ${test.name} error code ${errorCode}\n`;
+                        output.value += `SUCCESS: Received expected error code ${errorCode}\n`;
+                        console.log(`Test passed - received expected error code ${errorCode}`);
+                    } else {
+                        text += `FAIL: ${test.name} error code ${errorCode}\n`;
+                        output.value += `FAIL: Expected error codes ${test.expectedErrorCodes.join(', ')}, got ${errorCode || 'no error'}\n`;
+                        console.error(`Test failed - unexpected response`, response);
+                    }
+                } else if (test.expectResult) {
+                    if (response.result) {
+                        if (response.result.statements) {
+                            const count = response.result.statements.length;
+                            const expectedEmpty = test.trnCount === 0;
+                            const isSuccess = (expectedEmpty && count === 0) || (!expectedEmpty && count > 0);
+                            const status = isSuccess ? "SUCCESS" : "FAIL";
+                            text += `${status}: ${test.name} statements count: ${count}`;
+                        } else {
+                            text += `SUCCESS: ${test.name}`;
+                            output.value += `SUCCESS: Received expected result\n`;
+                            console.log('Test passed - received expected result');
+                        }
+                        text += '\n';
+                        output.value += `SUCCESS: Received expected result\n`;
+                        console.log('Test passed - received expected result');
+                    } else {
+                        text += `FAIL: ${test.name}\n`;
+                        output.value += `FAIL: Expected result but got error\n`;
+                        console.error('Test failed - expected result but got error');
+                    }
+                } else if (test.transactionState) {
+                    if (response.result) {
+                        if (response.result.transactionState === test.transactionState) {
+                            text += `SUCCESS: ${test.name} transactionState=${test.transactionState}\n`;
+                            output.value += `SUCCESS: Received expected result\n`;
+                            console.log('Test passed - received expected result');
+                        }else {
+                            text += `FAIL: ${test.name} transactionState=${test.transactionState}\n `;
+                            output.value += `FAIL: Expected result but got error\n`;
+                            console.error('Test failed - expected result but got error');
+                        }
+                    } else {
+                        text += `FAIL: ${test.name}\n`;
+                        output.value += `FAIL: Expected result but got error\n`;
+                        console.error('Test failed - expected result but got error');
+                    }
+                } else {
+                    output.value += `Response:\n${JSON.stringify(response, null, 2)}\n`;
+                }
+            } catch (error) {
+                console.error(`Test failed: ${test.name}`, error);
+                output.value += `ERROR: ${error.message}\n`;
+            }
+        }
+
+        output.value += '\n🏁 All test cases completed.\n';
+        output.value += text;
+        console.log('All tests completed');
+    }
+
+    function getGetInformationBody(serviceId, fieldName, fieldValue) {
+        console.log('Building GetInformation body with:', {serviceId, fieldName, fieldValue});
+        if (!serviceId || isNaN(serviceId)) {
+            throw new Error('Service ID must be a number');
+        }
+        if (!fieldValue) {
+            throw new Error('Field value is required');
+        }
+
+        return {
+            id: generateTransactionId(),
+            method: "GetInformation",
+            jsonrpc: "2.0",
+            params: {
+                serviceId: parseInt(serviceId),
+                fields: {
+                    [fieldName || 'phone']: fieldValue || '998901234567'
+                }
+            }
+        };
+    }
+
+    function getPerformTransactionBody(serviceId, amount, transactionId, fieldName, fieldValue) {
+        console.log('Building PerformTransaction body with:', {
+            serviceId,
+            amount,
+            transactionId,
+            fieldName,
+            fieldValue
+        });
+        if (!amount || isNaN(amount) || amount <= 0) {
+            throw new Error('Amount must be a positive number');
+        }
+        if (!serviceId || isNaN(serviceId)) {
+            throw new Error('Service ID must be a number');
+        }
+
+        return {
+            id: generateTransactionId(),
+            method: "PerformTransaction",
+            jsonrpc: "2.0",
+            params: {
+                amount: parseInt(amount) * 100, // Convert to smallest currency units
+                serviceId: parseInt(serviceId),
+                transactionId: transactionId,
+                fields: {
+                    [fieldName || 'phone']: fieldValue || '998901234567'
+                },
+                timestamp: formatPaynetDate(new Date())
+            }
+        };
+    }
+
+    function getCheckTransactionBody(serviceId, transactionId) {
+        console.log('Building CheckTransaction body with:', {serviceId, transactionId});
+        if (!transactionId) {
+            throw new Error('Transaction ID is required');
+        }
+        if (!serviceId || isNaN(serviceId)) {
+            throw new Error('Service ID must be a number');
+        }
+
+        return {
+            jsonrpc: "2.0",
+            method: "CheckTransaction",
+            id: generateTransactionId(),
+            params: {
+                serviceId: parseInt(serviceId),
+                transactionId: transactionId,
+                timestamp: formatPaynetDate(new Date())
+            }
+        };
+    }
+
+    function getCancelTransactionBody(serviceId, transactionId) {
+        console.log('Building CancelTransaction body with:', {serviceId, transactionId});
+        if (!transactionId) {
+            throw new Error('Transaction ID is required');
+        }
+        if (!serviceId || isNaN(serviceId)) {
+            throw new Error('Service ID must be a number');
+        }
+
+        return {
+            jsonrpc: "2.0",
+            method: "CancelTransaction",
+            id: generateTransactionId(),
+            params: {
+                serviceId: parseInt(serviceId),
+                transactionId: transactionId,
+                timestamp: formatPaynetDate(new Date())
+            }
+        };
+    }
+
+    function getGetStatementBody(serviceId, dateFrom, dateTo) {
+        console.log('Building GetStatement body with:', {serviceId, dateFrom, dateTo});
+        if (!dateFrom || !dateTo) {
+            throw new Error('Both date ranges are required');
+        }
+        if (!serviceId || isNaN(serviceId)) {
+            throw new Error('Service ID must be a number');
+        }
+
+        return {
+            jsonrpc: "2.0",
+            method: "GetStatement",
+            id: generateTransactionId(),
+            params: {
+                serviceId: parseInt(serviceId),
+                dateFrom: formatPaynetDate(new Date(dateFrom)),
+                dateTo: formatPaynetDate(new Date(dateTo))
+            }
+        };
+    }
+</script>
+</body>
+</html>

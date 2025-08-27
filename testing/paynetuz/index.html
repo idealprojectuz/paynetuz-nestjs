@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Paynet NorthWind - Login</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 30px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button[type="reset"] {
+      background-color: #f44336;
+    }
+    label {
+      display: block;
+      text-align: left;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://cdn.prod.website-files.com/6399bcedb6020e301f825c28/644e05c460a3270b14e86c6f_paynet-logo-5.svg" alt="Paynet NorthWind" width="300">
+    <form onsubmit="saveSettings(event)">
+      <label>API Endpoint URL:</label>
+      <input type="text" id="url" placeholder="https://api.example.com" required>
+      
+      <label>Username:</label>
+      <input type="text" id="username" placeholder="Enter your username" required>
+      
+      <label>Password:</label>
+      <input type="password" id="password" placeholder="Enter your password" required>
+      
+      <div>
+        <button type="submit">Save & Continue</button>
+        <button type="reset">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function saveSettings(e) {
+      e.preventDefault();
+      const url = document.getElementById('url').value;
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      // Validate URL format
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        alert('Please enter a valid URL starting with http:// or https://');
+        return;
+      }
+
+      // Save to localStorage
+      localStorage.setItem('paynet_url', url);
+      localStorage.setItem('paynet_user', username);
+      localStorage.setItem('paynet_pass', password);
+
+      // Redirect to method page
+      window.location.href = 'method.html';
+    }
+
+    // Load saved values if they exist
+    window.onload = function() {
+      const savedUrl = localStorage.getItem('paynet_url');
+      const savedUser = localStorage.getItem('paynet_user');
+      
+      if (savedUrl) document.getElementById('url').value = savedUrl;
+      if (savedUser) document.getElementById('username').value = savedUser;
+    };
+  </script>
+</body>
+</html>
