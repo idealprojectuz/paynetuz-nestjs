@@ -1,17 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { RequestBody } from './types/incoming-request-body';
-import { TransactionMethods } from './constants/transaction-methods';
-import { GetInformationDto } from './dto/getinformation.dto';
-import { CheckTransaction } from './dto/checkTransaction.dto';
-import { CancelTransactionDto } from './dto/cancelTransaction.dto';
-import { GetStatement } from './dto/getStatement.dto';
-import { PerformTransactionDto } from './dto/performTransaction.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { PaynetStatusCode } from './constants/error_status_codes';
-import { PaynetError } from './constants/paynet-error';
-import { format } from 'date-fns';
-import { error } from 'console';
-import { TransactionState } from './constants/transaction.state';
+import { Injectable, Logger } from "@nestjs/common";
+import { RequestBody } from "./types/incoming-request-body";
+import { TransactionMethods } from "./constants/transaction-methods";
+import { GetInformationDto } from "./dto/getinformation.dto";
+import { CheckTransaction } from "./dto/checkTransaction.dto";
+import { CancelTransactionDto } from "./dto/cancelTransaction.dto";
+import { GetStatement } from "./dto/getStatement.dto";
+import { PerformTransactionDto } from "./dto/performTransaction.dto";
+import { PrismaService } from "src/prisma/prisma.service";
+import { PaynetStatusCode } from "./constants/error_status_codes";
+import { PaynetError } from "./constants/paynet-error";
+import { format } from "date-fns";
+import { error } from "console";
+import { TransactionState } from "./constants/transaction.state";
 
 @Injectable()
 export class PaynetService {
@@ -35,7 +35,7 @@ export class PaynetService {
       case TransactionMethods.PerformTransaction:
         return await this.performTransaction(reqBody as PerformTransactionDto);
       default:
-        return 'Invalid transaction method';
+        return "Invalid transaction method";
     }
   }
 
@@ -49,19 +49,19 @@ export class PaynetService {
 
       if (!client) {
         return {
-          jsonrpc: '2.0',
+          jsonrpc: "2.0",
           id: body.id,
           error: PaynetError.ClientNotFound,
         };
       }
       const now = new Date();
-      const formatted = format(now, 'yyyy-MM-dd HH:mm:ss');
 
+      const formatted = format(now, "yyyy-MM-dd HH:mm:ss");
       return {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: body.id,
         result: {
-          status: '0',
+          status: "0",
           timestamp: formatted,
           fields: {
             user_id: Number(client.id),
@@ -70,15 +70,14 @@ export class PaynetService {
               client.first_name.length >= 20
                 ? String(client.first_name.slice(0, 20))
                 : String(client.first_name),
-
-            username: client.username ? '@' + client.username : 'nomalum',
-            phone: client.phone_number ? client.phone_number : 'nomalum',
+            username: client.username ? "@" + client.username : "nomalum",
+            phone: client.phone_number ? client.phone_number : "nomalum",
           },
         },
       };
     } catch (error) {
       return {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: body.id,
         error: PaynetError.ValidationErrorParam1,
       };
@@ -89,34 +88,42 @@ export class PaynetService {
     const transaction = await this.prismaService.transaction.findFirst({
       where: {
         transactionId: String(body.params.transactionId),
-        provider: 'PAYNETUZ',
+        provider: "PAYNETUZ",
       },
     });
     if (!transaction) {
       return {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: body.id,
         error: PaynetError.TransactionNotFound,
       };
     }
 
     return {
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       id: body.id,
       result: {
         transactionState:
-          transaction.status == 'PAID'
+          transaction.status == "PAID"
             ? TransactionState.SUCCESS
-            : transaction.status == 'CANCELED'
-              ? TransactionState.CANCELLED
-              : TransactionState.NOT_FOUND,
-        timestamp: format(transaction.updatedAt, 'yyyy-MM-dd HH:mm:ss'),
+            : transaction.status == "CANCELED"
+            ? TransactionState.CANCELLED
+            : TransactionState.NOT_FOUND,
+        timestamp: format(transaction.updatedAt, "yyyy-MM-dd HH:mm:ss"),
         providerTrnId: transaction.id,
       },
     };
   }
   async performTransaction(body: PerformTransactionDto) {
     // this.logger.log(this.performTransaction.name, body);
+
+    if (body.params.amount / 100 < 1000) {
+      return {
+        jsonrpc: "2.0",
+        id: body.id,
+        error: PaynetError.InvalidAmount,
+      };
+    }
 
     const transaction = await this.prismaService.transaction.findFirst({
       where: {
@@ -129,7 +136,7 @@ export class PaynetService {
 
     if (transaction) {
       return {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: body.id,
         error: PaynetError.TransactionAlreadyExists,
       };
@@ -141,7 +148,7 @@ export class PaynetService {
     });
     if (!user) {
       return {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: body.id,
         error: PaynetError.ClientNotFound,
       };
@@ -150,18 +157,18 @@ export class PaynetService {
     const newtransaction = await this.prismaService.transaction.create({
       data: {
         transactionId: body.params.transactionId.toString(),
-        provider: 'PAYNETUZ',
+        provider: "PAYNETUZ",
         prepareId: BigInt(body.id),
         amount: body.params.amount / 100,
         userId: body.params.fields.user_id,
-        status: 'PAID',
+        status: "PAID",
       },
     });
 
     await this.prismaService.users.update({
       data: {
         balance: {
-          increment: body.params.amount / 100,
+          increment: newtransaction.amount,
         },
       },
       where: {
@@ -170,10 +177,10 @@ export class PaynetService {
     });
 
     return {
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       id: body.id,
       result: {
-        timestamp: format(newtransaction.createdAt, 'yyyy-MM-dd HH:mm:ss'),
+        timestamp: format(newtransaction.createdAt, "yyyy-MM-dd HH:mm:ss"),
         providerTrnId: newtransaction.id,
         fields: {
           user_id: body.params.fields.user_id,
@@ -185,7 +192,7 @@ export class PaynetService {
     const transaction = await this.prismaService.transaction.findFirst({
       where: {
         transactionId: String(body.params.transactionId),
-        provider: 'PAYNETUZ',
+        provider: "PAYNETUZ",
       },
       include: {
         user: true,
@@ -193,15 +200,16 @@ export class PaynetService {
     });
     if (!transaction) {
       return {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: body.id,
         error: PaynetError.TransactionNotFound,
       };
     }
-    if ((transaction.status = 'CANCELED')) {
+
+    if (transaction.status == "CANCELED") {
       return {
-        jsonrpc: '2.0',
-        id: body.id,
+        jsonrpc: "2.0",
+        // id: body.id,
         error: PaynetError.CanceladPayment,
       };
     }
@@ -212,7 +220,7 @@ export class PaynetService {
           id: transaction.id,
         },
         data: {
-          status: 'CANCELED',
+          status: "CANCELED",
         },
       });
       await this.prismaService.users.update({
@@ -226,41 +234,60 @@ export class PaynetService {
         },
       });
       return {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: body.id,
         result: {
           providerTrnId: transaction.id,
-          timestamp: format(trans.updatedAt, 'yyyy-MM-dd HH:mm:ss'),
+          timestamp: format(trans.updatedAt, "yyyy-MM-dd HH:mm:ss"),
           transactionState: TransactionState.CANCELLED,
         },
       };
     }
     return {
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       id: body.id,
       error: PaynetError.INSUFFICIENT_FUNDS_FOR_CANCEL,
     };
   }
   async getStatement(body: GetStatement) {
+    // console.log({
+    //   dateFrom: new Date(body.params.dateFrom),
+    //   dateTo: new Date(body.params.dateTo),
+    // });
     const transactions = await this.prismaService.transaction.findMany({
       where: {
-        provider: 'PAYNETUZ',
+        provider: "PAYNETUZ",
+        status: "PAID",
         createdAt: {
           gte: new Date(body.params.dateFrom),
           lte: new Date(body.params.dateTo),
         },
       },
     });
-
+    // if (transactions.length == 1) {
+    //   const el = transactions[0];
+    //   return {
+    //     jsonrpc: '2.0',
+    //     id: body.id,
+    //     result: {
+    //       statements: {
+    //         amount: el.amount * 100,
+    //         providerTrnId: el.id,
+    //         transactionId: el.transactionId,
+    //         timestamp: format(el.createdAt, 'yyyy-MM-dd HH:mm:ss'),
+    //       },
+    //     },
+    //   };
+    // }
     return {
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       id: body.id,
       result: {
         statements: transactions.map((el) => ({
           amount: el.amount * 100,
           providerTrnId: el.id,
           transactionId: el.transactionId,
-          timestamp: format(el.updatedAt, 'yyyy-MM-dd HH:mm:ss'),
+          timestamp: format(el.createdAt, "yyyy-MM-dd HH:mm:ss"),
         })),
       },
     };
